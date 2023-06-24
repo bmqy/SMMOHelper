@@ -5,23 +5,51 @@
 // @author     monkey
 // @icon       https://vitejs.dev/logo.svg
 // @match      https://web.simple-mmo.com/*
+// @grant      GM_getValue
 // @grant      GM_info
+// @grant      GM_setValue
+// @grant      GM_xmlhttpRequest
 // ==/UserScript==
 
 (function () {
   'use strict';
 
+  var _GM_getValue = /* @__PURE__ */ (() => typeof GM_getValue != "undefined" ? GM_getValue : void 0)();
   var _GM_info = /* @__PURE__ */ (() => typeof GM_info != "undefined" ? GM_info : void 0)();
+  var _GM_setValue = /* @__PURE__ */ (() => typeof GM_setValue != "undefined" ? GM_setValue : void 0)();
+  var _GM_xmlhttpRequest = /* @__PURE__ */ (() => typeof GM_xmlhttpRequest != "undefined" ? GM_xmlhttpRequest : void 0)();
   (function() {
     const SMMOHelper = {
+      storageKey: {
+        player: "player",
+        playerId: "playerId",
+        levelStep: "levelStep",
+        token: "csrfToken"
+      },
+      getValue(key) {
+        return _GM_getValue(key, "");
+      },
+      setValue(key, val) {
+        return _GM_setValue(key, val);
+      },
       init() {
         window.addEventListener("load", () => {
+          this.fakeFetch();
+          this.searchPlayerId();
           this.resetDonateButton();
           this.resetJobsButton();
           this.addHeadTravelBtn();
           this.showFooter();
           this.onUserClickBtn();
         });
+      },
+      searchPlayerId() {
+        setTimeout(() => {
+          let a = document.querySelector('a[href^="/user/view/"]');
+          let id = a.href.match(/\d+/)[0];
+          if (id)
+            this.setValue(this.storageKey.playerId, id);
+        }, 0);
       },
       // 顶部导航增加旅行按钮
       addHeadTravelBtn() {
@@ -61,6 +89,7 @@
           btns.forEach((e, i) => {
             if (e.id.indexOf("step_btn_") > -1) {
               e.addEventListener("click", () => {
+                this.getPlayerBio();
                 console.log("旅行");
               });
             }
@@ -105,19 +134,17 @@
       },
       // 重置Donate
       resetDonateButton() {
-        document.querySelectorAll("button").forEach((e, i) => {
-          if (e.innerText === "Gold") {
-            e.outerHTML = e.outerHTML.replace("donate(", "SMMOHelper.bmqyDonate(");
-          }
-        });
+        let _this = this;
+        window.donate = function() {
+          _this.bmqyDonate.apply(this, arguments);
+        };
       },
       // 重置Jobs
       resetJobsButton() {
-        document.querySelectorAll("button").forEach((e, i) => {
-          if (e.innerText === "Start working") {
-            e.outerHTML = e.outerHTML.replace("performJob(", "SMMOHelper.bmqyPerformJob(");
-          }
-        });
+        let _this = this;
+        window.performJob = function() {
+          _this.bmqyPerformJob.apply(this, arguments);
+        };
       },
       // 重写金币捐赠方法
       bmqyDonate() {
@@ -211,6 +238,114 @@
             });
           }
         });
+      },
+      // 拦截请求
+      fakeFetch() {
+        const originFetch = window.fetch;
+        window.fetch = (url, options) => {
+          return originFetch(url, options).then(async (response) => {
+            if (url === "https://api.simple-mmo.com/api/action/travel/4") {
+              let resRaw = response.clone();
+              let resF = await resRaw.json();
+              this.checkPlayerLevel(resF.level) && this.updatePlayerBio(resF.level);
+              _GM_setValue(this.storageKey.player, resF);
+              return response;
+            } else {
+              return response;
+            }
+          });
+        };
+      },
+      http(options) {
+        return new Promise((resolve, reject) => {
+          _GM_xmlhttpRequest({
+            method: options.methods || "GET",
+            url: options.url,
+            responseType: options.responseType || null,
+            headers: options.headers || null,
+            data: options.data || "",
+            onload: function(xhr) {
+              if (xhr.status == 200) {
+                resolve(xhr.response);
+              } else {
+                reject(xhr.response);
+              }
+            },
+            onerror: function(xhr) {
+              reject(xhr.response);
+            }
+          });
+        });
+      },
+      // 检测等级变化
+      checkPlayerLevel(level) {
+        let playerData = _GM_getValue(this.storageKey.player, {});
+        if (!playerData.level)
+          return false;
+        let levelStep = _GM_getValue("levelStep", 100);
+        if (playerData.level != level && level % levelStep === 0) {
+          return true;
+        }
+        return false;
+      },
+      getNewBio(level, old) {
+        let news = "";
+        let oldArr = [];
+        if (old.indexOf("===== LEVEL UP =====") === -1) {
+          news = `${old}
+===== LEVEL UP =====
+${this.getDate()} LV${level}
+===== UPDATE =====`;
+        } else {
+          let oldStr = /\=\=\=\=\= LEVEL UP \=\=\=\=\=\n([a-zA-Z0-9 \-\r\n:]+)\n(?=\=\=\=\=\= UPDATE \=\=\=\=\=)/ig.exec(old)[1];
+          oldArr = oldStr.split(/\n/);
+          let newLine = `${this.getDate()} LV${level}`;
+          if (oldArr.indexOf(newLine) === -1) {
+            oldArr.push(newLine);
+          }
+          news = old.replace(/(\=\=\=\=\= LEVEL UP \=\=\=\=\=\n)([a-zA-Z0-9 \-\r\n:]+)(\n\=\=\=\=\= UPDATE \=\=\=\=\=)/ig, `$1${oldArr.join("\n")}$3`);
+        }
+        return news;
+      },
+      getDate() {
+        let now = /* @__PURE__ */ new Date();
+        let y = now.getFullYear();
+        let m = ("0" + (now.getMonth() + 1)).slice(-2);
+        let d = ("0" + now.getDate()).slice(-2);
+        return `${y}-${m}-${d}`;
+      },
+      // 更新Bio
+      async updatePlayerBio(level) {
+        let playerId = this.getValue(this.storageKey.playerId);
+        let csrfToken = this.getValue(this.storageKey.token);
+        if (!playerId || !csrfToken)
+          return false;
+        let url = `https://web.simple-mmo.com/user/character/${playerId}/bio/submit`;
+        let old = await this.getPlayerBio();
+        let newBio = await this.getNewBio(level, old);
+        this.http({
+          url,
+          methods: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          data: `_token=${csrfToken}&content=${newBio}`
+        });
+      },
+      // 获取Bio
+      async getPlayerBio() {
+        let playerId = this.getValue(this.storageKey.playerId);
+        if (!playerId)
+          return false;
+        let url = `https://web.simple-mmo.com/user/view/${playerId}/bio?new_page_refresh=true`;
+        let response = await this.http({
+          url
+        });
+        let domParser = new DOMParser();
+        let dom = domParser.parseFromString(response, "text/html");
+        let csrfToken = document.querySelector("meta[name=csrf-token]").content;
+        this.setValue(this.storageKey.token, csrfToken);
+        return dom.querySelector("textarea#content").innerHTML;
       }
     };
     if (!window.SMMOHelper)
