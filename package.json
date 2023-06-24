@@ -1,5 +1,6 @@
 {
   "name": "smmohelper",
+  "description": "https://web.simple-mmo.com/，游戏助手",
   "private": true,
   "version": "1.0.0",
   "type": "module",
