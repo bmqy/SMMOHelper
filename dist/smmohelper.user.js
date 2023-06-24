@@ -1,14 +1,15 @@
 // ==UserScript==
-// @name       SMMO游戏助手
-// @namespace  npm/vite-plugin-monkey
-// @version    1.0.0
-// @author     monkey
-// @icon       https://vitejs.dev/logo.svg
-// @match      https://web.simple-mmo.com/*
-// @grant      GM_getValue
-// @grant      GM_info
-// @grant      GM_setValue
-// @grant      GM_xmlhttpRequest
+// @name         SMMO游戏助手
+// @namespace    npm/vite-plugin-monkey
+// @version      1.0.0
+// @author       monkey
+// @description  https://web.simple-mmo.com/，游戏助手
+// @icon         https://vitejs.dev/logo.svg
+// @match        https://web.simple-mmo.com/*
+// @grant        GM_getValue
+// @grant        GM_info
+// @grant        GM_setValue
+// @grant        GM_xmlhttpRequest
 // ==/UserScript==
 
 (function () {
