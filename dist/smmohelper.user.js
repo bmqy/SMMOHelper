@@ -28,10 +28,18 @@
         token: "csrfToken"
       },
       getValue(key) {
-        return _GM_getValue(key, "");
+        try {
+          return _GM_getValue(key, "");
+        } catch (error) {
+          return localStorage.getItem(key) || "";
+        }
       },
       setValue(key, val) {
-        return _GM_setValue(key, val);
+        try {
+          return _GM_setValue(key, val);
+        } catch (error) {
+          localStorage.setItem(key, val);
+        }
       },
       init() {
         window.addEventListener("load", () => {
@@ -56,8 +64,11 @@
       addHeadTravelBtn() {
         if (location.href.indexOf("/travel") > -1 && location.href.indexOf("/travel/party") === -1)
           return false;
+        if (document.querySelector("#btnToTravel"))
+          return false;
         let $box = document.querySelector(".ml-4.flex.items-center.relative");
         let $a = document.createElement("a");
+        $a.id = "btnToTravel";
         $a.innerHTML = `<a href="/travel">
                     <button class="relative lg:hidden flex-shrink-0 bg-white p-1 text-indigo-600 dark:text-indigo-700 dark:bg-indigo-950 rounded-full hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mr-4">
                     <span class="sr-only">View Friends</span>
@@ -249,7 +260,7 @@
               let resRaw = response.clone();
               let resF = await resRaw.json();
               this.checkPlayerLevel(resF.level) && this.updatePlayerBio(resF.level);
-              _GM_setValue(this.storageKey.player, resF);
+              setValue(this.storageKey.player, resF);
               return response;
             } else {
               return response;
@@ -280,10 +291,10 @@
       },
       // 检测等级变化
       checkPlayerLevel(level) {
-        let playerData = _GM_getValue(this.storageKey.player, {});
+        let playerData = getValue(this.storageKey.player, {});
         if (!playerData.level)
           return false;
-        let levelStep = _GM_getValue("levelStep", 100);
+        let levelStep = getValue("levelStep", 100);
         if (playerData.level != level && level % levelStep === 0) {
           return true;
         }
