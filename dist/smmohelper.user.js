@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SMMO游戏助手
 // @namespace    npm/vite-plugin-monkey
-// @version      1.0.0
+// @version      1.1.0
 // @author       monkey
 // @description  https://web.simple-mmo.com/，游戏助手
 // @icon         https://web.simple-mmo.com/apple-touch-icon.png
