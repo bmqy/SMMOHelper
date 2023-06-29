@@ -8,7 +8,7 @@ export default defineConfig({
       entry: 'src/main.js',
       userscript: {
         name: 'SMMO游戏助手',
-        icon: 'https://vitejs.dev/logo.svg',
+        icon: 'https://web.simple-mmo.com/apple-touch-icon.png',
         namespace: 'npm/vite-plugin-monkey',
         match: ['https://web.simple-mmo.com/*'],
       },
