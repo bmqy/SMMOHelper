@@ -1,6 +1,6 @@
 # SMMOHelper
 
-[Sample-mmo.com](www.simple-mmo.com)助手脚本
+[Sample-mmo.com](www.simple-mmo.com)SMMO助手，web端游戏功能辅助工具。本助手致力于：不帮你玩游戏，但是可以让你更好地玩游戏。
 
 # 功能：
 - [x] 自动更新玩家```Bio```，记录等级升级日志
