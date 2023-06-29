@@ -148,7 +148,7 @@
           e.addEventListener("click", function() {
             setTimeout(() => {
               document.querySelector(".swal2-input").value = 2e3;
-            }, 300);
+            }, 0);
           });
         }
       });
@@ -157,99 +157,11 @@
     resetJobsButton() {
       document.querySelectorAll("button[type=button]").forEach((e) => {
         if (e.innerText === "Start working") {
-          e.outerHTML = e.outerHTML.replace("performJob(", "SMMOHelper.bmqyPerformJob(");
-        }
-      });
-    },
-    // 重写金币捐赠方法
-    bmqyDonate() {
-      Swal.fire({
-        imageUrl: "/img/icons/I_GoldCoin.png",
-        title: "Gold Donation",
-        html: "Make a donation to the poor orphanage to help the less fortunate.",
-        input: "number",
-        inputValue: "2000",
-        inputAttributes: {
-          autocapitalize: "off"
-        },
-        showCancelButton: true,
-        confirmButtonText: "Donate",
-        showLoaderOnConfirm: true,
-        preConfirm: function(login) {
-          return fetch("/orphanage/donate", {
-            "method": "POST",
-            body: new URLSearchParams("_token=" + token + "&data=" + login)
-          }).then((response) => {
-            if (!response.ok) {
-              throw new Error(response.statusText);
-            }
-            return response.json();
-          }).catch((error) => {
-            Swal.showValidationMessage(
-              `Request failed: ${error}`
-            );
-          });
-        },
-        allowOutsideClick: () => !Swal.isLoading()
-      }).then((result) => {
-        if (result.value) {
-          Swal.fire({
-            title: result.value.title,
-            type: result.value.type,
-            html: result.value.result
-          });
-        }
-      });
-    },
-    // 重写工作方法
-    bmqyPerformJob(id, name, gold, exp) {
-      var additional_text = "";
-      additional_text = additional_text + "<hr/><i>Become a member and get 10 more jobs</i><br/><a href='/diamondstore/membership' class='cta cta-success'>Become a member</a>";
-      additional_text = additional_text + '<hr/><h2 class="swal2-title" id="swal2-title" style="font-size:18.75px">How long do you want to work?</h2>';
-      Swal.fire({
-        title: name,
-        html: 'How many times do you want to perform this job? Each job lasts 10 minutes and you can only perform a maximum of 10 jobs.<br/><br/><div class="notice notice-info">You cannot travel, perform quests, or battle while you are performing a job</div><div style="text-align:center"><h2 class="swal2-title" id="swal2-title" style="font-size:18.75px">Rewards</h2></div><img src="/img/icons/I_GoldCoin.png" height="15px"> ' + gold + ' <img src="/img/icons/S_Light01.png"  height="15px"> ' + exp + '<br/> <span style="color:rgba(0,0,0,0.6);font-size:11px;font-weight:500;">Per job</span>' + additional_text,
-        input: "range",
-        inputAttributes: {
-          min: 1,
-          max: 10,
-          step: 1
-        },
-        inputValue: 10,
-        showCancelButton: true,
-        confirmButtonText: "Start the job",
-        cancelButtonText: "No! I don't want to work!",
-        showLoaderOnConfirm: true,
-        preConfirm: (amount) => {
-          return fetch(`/api/job/perform/` + id + `/` + amount, {
-            "method": "POST",
-            headers: {
-              "X-CSRF-TOKEN": token
-            }
-          }).then((response) => {
-            if (response.status == 403) {
-              throw new Error("Something went wrong.");
-            }
-          }).catch((error) => {
-            Swal.showValidationMessage(
-              `Request failed: ${error}`
-            );
-          });
-        },
-        allowOutsideClick: () => !Swal.isLoading()
-      }).then((result) => {
-        if (result.value) {
-          Swal.fire({
-            title: `Started!`,
-            type: `success`,
-            showConfirmButton: false,
-            text: `You have started the job. Please wait a few moments.`,
-            onBeforeOpen: () => {
-              Swal.showLoading();
-              setTimeout(function() {
-                window.location.href = "/jobs/view/" + id;
-              }, 1500);
-            }
+          e.addEventListener("click", function() {
+            setTimeout(() => {
+              document.querySelector("input[type=range]").value = 10;
+              document.querySelector("output").innerHTML = 10;
+            }, 0);
           });
         }
       });
