@@ -1,6 +1,7 @@
 {
   "name": "smmohelper",
   "description": "https://web.simple-mmo.com/，游戏助手",
+  "author": "bmqy",
   "private": true,
   "version": "1.1.1",
   "type": "module",

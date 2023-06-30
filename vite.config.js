@@ -9,7 +9,7 @@ export default defineConfig({
       userscript: {
         name: 'SMMO游戏助手',
         icon: 'https://web.simple-mmo.com/apple-touch-icon.png',
-        namespace: 'npm/vite-plugin-monkey',
+        namespace: 'bmqy.net',
         match: ['https://web.simple-mmo.com/*'],
       },
     }),
