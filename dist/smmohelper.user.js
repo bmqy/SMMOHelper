@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SMMO游戏助手
 // @namespace    npm/vite-plugin-monkey
-// @version      1.1.0
+// @version      1.1.1
 // @author       monkey
 // @description  https://web.simple-mmo.com/，游戏助手
 // @icon         https://web.simple-mmo.com/apple-touch-icon.png
@@ -77,6 +77,21 @@
             </a>`;
       $box.insertBefore($a, $box.childNodes[0]);
     },
+    // 增加脚本设置项
+    addSettingsItem() {
+      if (location.href.indexOf("/preferences/customisation") === -1)
+        return false;
+      document.querySelector(".flex.items-center.justify-between.rounded-lg").parentNode;
+      let $newItem = document.createElement("div");
+      $newItem.className = "flex items-center justify-between bg-white rounded-lg px-2 py-3 mt-2";
+      $newItem.innerHTML = `<span class="flex-grow flex flex-col ml-2">
+          <span class="text-xs sm:text-sm font-medium text-gray-900" id="smmo-helper-label">工作次数</span>
+          <span class="text-xs sm:text-sm text-gray-500" id="smmo-helper-description">是否设置工作次数默认10次</span>
+        </span>
+        <button type="button" class="bg-indigo-600 relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" role="switch" aria-checked="false" aria-labelledby="smmo-helper-label" aria-describedby="smmo-helper-description">
+          <span aria-hidden="true" class="translate-x-5 pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"></span>
+        </button>`;
+    },
     // 脚本底部信息
     showFooter() {
       let $div = document.createElement("div");
@@ -87,9 +102,6 @@
       $div.style.color = "#999";
       $div.innerHTML = `${_GM_info["script"]["name"]} v${_GM_info["script"]["version"]}`;
       document.body.appendChild($div);
-    },
-    // 验证辅助
-    validateHelp() {
     },
     // 监听事件动作，更新Bio
     onUserClickBtn() {
@@ -175,7 +187,7 @@
             let resRaw = response.clone();
             let resF = await resRaw.json();
             this.checkPlayerLevel(resF.level) && this.updatePlayerBio(resF.level);
-            setValue(this.storageKey.player, resF);
+            this.setValue(this.storageKey.player, resF);
             return response;
           } else {
             return response;
@@ -206,10 +218,10 @@
     },
     // 检测等级变化
     checkPlayerLevel(level) {
-      let playerData = getValue(this.storageKey.player, {});
+      let playerData = this.getValue(this.storageKey.player, {});
       if (!playerData.level)
         return false;
-      let levelStep = getValue("levelStep", 100);
+      let levelStep = this.getValue("levelStep", 100);
       if (playerData.level != level && level % levelStep === 0) {
         return true;
       }
