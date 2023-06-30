@@ -3,7 +3,7 @@
 // @namespace    bmqy.net
 // @version      1.1.1
 // @author       bmqy
-// @description  https://web.simple-mmo.com/，游戏助手
+// @description  https://web.simple-mmo.com/，web端游戏功能辅助工具。本助手致力于：不帮你玩游戏，但是可以让你更好地玩游戏。
 // @icon         https://web.simple-mmo.com/apple-touch-icon.png
 // @match        https://web.simple-mmo.com/*
 // @grant        GM_getValue
